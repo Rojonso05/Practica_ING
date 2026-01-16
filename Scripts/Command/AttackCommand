@@ -1,0 +1,16 @@
+using UnityEngine;
+
+public class AttackCommand : ICommand
+{
+    private MovimientosAbuela abuela;
+
+    public AttackCommand(MovimientosAbuela abuela)
+    {
+        this.abuela = abuela;
+    }
+
+    public void Execute()
+    {
+        abuela.Attack();
+    }
+}
