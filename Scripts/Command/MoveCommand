@@ -1,0 +1,19 @@
+using UnityEngine;
+
+public class MoveCommand : ICommand
+{
+    private MovimientosAbuela abuela;
+    private float direction;
+
+    public MoveCommand(MovimientosAbuela abuela, float direction)
+    {
+        this.abuela = abuela;
+        this.direction = direction;
+    }
+
+    public void Execute()
+    {
+        abuela.Move(direction);
+    }
+}
+
