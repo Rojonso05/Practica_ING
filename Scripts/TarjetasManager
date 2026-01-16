@@ -1,0 +1,36 @@
+using UnityEngine;
+using UnityEngine.UI;
+
+public class TarjetasManager : MonoBehaviour
+{
+    public Text tarjetasTotal;
+    public Text tarjetasCollected;
+
+    private int tarjetasTotalInLevel;
+    private LevelManager levelManager;
+    private bool eventoLanzado = false;
+
+    private void Start()
+    {
+        tarjetasTotalInLevel = transform.childCount;
+        levelManager = FindObjectOfType<LevelManager>();
+    }
+
+    private void Update()
+    {
+        tarjetasTotal.text = tarjetasTotalInLevel.ToString();
+        tarjetasCollected.text = transform.childCount.ToString();
+
+        AllTarjetasCollected();
+    }
+
+    private void AllTarjetasCollected()
+    {
+        if (!eventoLanzado && transform.childCount == 0)
+        {
+            eventoLanzado = true;
+            Debug.Log("Todas las tarjetas recogidas");
+            levelManager.TodasTarjetasRecogidas();
+        }
+    }
+}
