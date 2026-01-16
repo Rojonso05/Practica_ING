@@ -1,0 +1,16 @@
+using UnityEngine;
+
+public class JumpCommand : ICommand
+{
+    private MovimientosAbuela abuela;
+
+    public JumpCommand(MovimientosAbuela abuela)
+    {
+        this.abuela = abuela;
+    }
+
+    public void Execute()
+    {
+        abuela.Jump();
+    }
+}
