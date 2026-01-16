@@ -1,0 +1,66 @@
+using UnityEngine;
+
+public class InputManager : MonoBehaviour
+{
+    private MovimientosAbuela abuela;
+    private CommandInvoker invoker;
+
+    private ICommand moveLeft;
+    private ICommand moveRight;
+    private ICommand stopMove;
+    private ICommand jump;
+    private ICommand attack;
+
+    private void Start()
+    {
+        // Buscar a la abuela en la escena
+        abuela = FindObjectOfType<MovimientosAbuela>();
+
+        if (abuela == null)
+        {
+            Debug.LogError("No se ha encontrado MovimientosAbuela en la escena");
+            return;
+        }
+
+        // Crear invoker
+        invoker = new CommandInvoker();
+
+        // Crear comandos
+        moveLeft = new MoveCommand(abuela, -1f);
+        moveRight = new MoveCommand(abuela, 1f);
+        stopMove = new MoveCommand(abuela, 0f);
+        jump = new JumpCommand(abuela);
+        attack = new AttackCommand(abuela);
+
+    }
+
+    private void Update()
+    {
+        // Movimiento izquierda / derecha SOLO con flechas
+        if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            invoker.ExecuteCommand(moveLeft);
+        }
+        else if (Input.GetKey(KeyCode.RightArrow))
+        {
+            invoker.ExecuteCommand(moveRight);
+        }
+        else
+        {
+            invoker.ExecuteCommand(stopMove);
+        }
+
+        // Salto
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            invoker.ExecuteCommand(jump);
+        }
+
+        // Ataque SOLO con A
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            invoker.ExecuteCommand(attack);
+        }
+
+    }
+}
