@@ -1,0 +1,31 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class SceneChangeObserver : MonoBehaviour, IGameObserver
+{
+    private LevelManager levelManager;
+
+    private void Start()
+    {
+        levelManager = FindObjectOfType<LevelManager>();
+        levelManager.RegisterObserver(this);
+    }
+
+    public void OnGameEvent(GameEvent gameEvent)
+    {
+        if (gameEvent == GameEvent.TodasTarjetasRecogidas)
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        }
+
+        if (gameEvent == GameEvent.JuegoGanado)
+        {
+            SceneManager.LoadScene("EscenaFinal");
+        }
+
+        if (gameEvent == GameEvent.AbuelaMuerta)
+        {
+            SceneManager.LoadScene("GameOver");
+        }
+    }
+}
