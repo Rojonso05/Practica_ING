@@ -1,0 +1,17 @@
+using System.Collections;
+using System.Collections.Generic;
+using System;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class tryAgainButtom : MonoBehaviour
+{
+    public void LoadSameScene(){
+        Scene scene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(scene.name);
+    }
+
+    public void Menu(string nombre){
+        SceneManager.LoadScene(nombre);
+    }
+}
