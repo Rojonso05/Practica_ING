@@ -1,0 +1,29 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+public class UltimoNivel : MonoBehaviour
+{
+    public Text tarjetasTotal;
+    public Text tarjetasCollected;
+
+    private int tarjetasTotalInLevel;
+    private void Start(){
+        tarjetasTotalInLevel = transform.childCount;
+    }
+   
+    private void Update(){
+        AllTarjetasCollected();
+        tarjetasTotal.text=tarjetasTotalInLevel.ToString();
+        tarjetasCollected.text=transform.childCount.ToString();
+    }
+    public void AllTarjetasCollected(){
+        if(transform.childCount==0){
+            Debug.Log("Lograste recuperar todas las tarjetas ¡Victoria!");
+            SceneManager.LoadScene(0);
+        }
+    }
+}
