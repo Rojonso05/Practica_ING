@@ -1,0 +1,54 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class LevelManager : MonoBehaviour
+{
+    private List<IGameObserver> observers = new List<IGameObserver>();
+
+    // ───── MÉTODOS QUE YA TENÍAS ─────
+    public void Jugar()
+    {
+        SceneManager.LoadScene(1);
+    }
+
+    public void Salir()
+    {
+        Debug.Log("Salir de juego");
+        Application.Quit();
+    }
+
+    public void IrACreditos()
+    {
+        SceneManager.LoadScene("EscenaCreditos");
+    }
+
+    // ───── OBSERVER ─────
+    public void RegisterObserver(IGameObserver observer)
+    {
+        if (!observers.Contains(observer))
+            observers.Add(observer);
+    }
+
+    public void NotifyObservers(GameEvent gameEvent)
+    {
+        foreach (var obs in observers)
+            obs.OnGameEvent(gameEvent);
+    }
+
+    // ───── EVENTOS DEL JUEGO ─────
+    public void TodasTarjetasRecogidas()
+    {
+        NotifyObservers(GameEvent.TodasTarjetasRecogidas);
+    }
+
+    public void AbuelaHaMuerto()
+    {
+        NotifyObservers(GameEvent.AbuelaMuerta);
+    }
+
+    public void JuegoGanado()
+    {
+        NotifyObservers(GameEvent.JuegoGanado);
+    }
+}
