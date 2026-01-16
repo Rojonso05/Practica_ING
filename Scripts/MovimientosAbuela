@@ -1,0 +1,176 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System;
+
+public class MovimientosAbuela : MonoBehaviour
+{
+    GameObject tryAgainButton;
+    private Rigidbody2D rb2D;
+    Collider2D playerCollider;
+    bool playerAlive = true;
+
+    [Header("Movimiento")]
+    private float movimientoHorizontal= 0f;
+
+     [SerializeField] private float velocidadDeMovimiento;
+
+     [Range(0, 0.3f)] [SerializeField] private float suavizadoDeMovimiento;
+    private Vector3 velocidad = Vector3.zero;
+    private bool mirandoDerecha = true;
+
+    [Header("Salto")]
+    [SerializeField] private float fuerzaDeSalto;
+    [SerializeField] private LayerMask esSuelo;
+    [SerializeField] private Transform contactoSuelo;
+    [SerializeField] private Vector3 dimensionesCaja;
+    [SerializeField] private bool enSuelo;
+    private bool salto=false;
+
+    [Header ("Animacion")]
+    private Animator animator;
+
+
+    ////////////////////////
+    ////////////////////////
+    [Header("Ataque")]
+    [SerializeField] private float tiempoEntreAtaques = 0.5f;
+    private bool puedeAtacar = true;
+    [SerializeField] private Transform attackPoint;
+    [SerializeField] private float attackRadius = 0.5f;
+    [SerializeField] private LayerMask enemyLayer;
+    ////////////////////////
+    ////////////////////////
+
+    private void Start()
+    {
+        animator = GetComponent<Animator>();
+        rb2D = GetComponent<Rigidbody2D>();
+        playerCollider = gameObject.GetComponent<Collider2D>();
+        animator = gameObject.GetComponent<Animator>();
+        tryAgainButton = GameObject.Find("TryAgainButton");
+        tryAgainButton.SetActive(false);
+
+    }
+
+    private void Update()
+    {
+        if (playerAlive){
+            Die();
+        }
+       //movimientoHorizontal = Input.GetAxisRaw("Horizontal") * velocidadDeMovimiento;
+
+       animator.SetFloat("Horizontal", Mathf.Abs(movimientoHorizontal));
+
+       /*if(Input.GetButtonDown("Jump")){
+        salto = true;
+       }*/
+       Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Jugador"),LayerMask.NameToLayer("Enemigo"),false);
+    }
+
+    private void FixedUpdate()
+    {
+        enSuelo = Physics2D.OverlapBox(contactoSuelo.position, dimensionesCaja, 0f, esSuelo);
+        animator.SetBool("enSuelo", enSuelo);
+
+        //Mover
+        Mover(movimientoHorizontal * Time.fixedDeltaTime, salto);
+
+        salto = false;
+    }
+
+    private void Mover(float mover, bool saltar)
+    {
+        Vector3 velocidadObjetivo = new Vector2(mover, rb2D.linearVelocity.y);
+        rb2D.linearVelocity = Vector3.SmoothDamp(rb2D.linearVelocity, velocidadObjetivo, ref velocidad, suavizadoDeMovimiento);
+
+        if (mover > 0 && !mirandoDerecha){
+            //Girar
+            Girar();
+        }else if (mover < 0 && mirandoDerecha){
+            //Girar
+            Girar();
+        }
+
+        if (enSuelo && saltar){
+            enSuelo = false;
+            rb2D.AddForce(new Vector2(0f, fuerzaDeSalto));
+        }
+    }
+    private void Girar (){
+        mirandoDerecha = !mirandoDerecha;
+        Vector3 escala = transform.localScale;
+        escala.x *= -1;
+        transform.localScale = escala;
+    }
+
+    private void OnDrawGizmos(){
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(contactoSuelo.position, dimensionesCaja);
+    }
+
+    private void Die(){
+        if(playerCollider.IsTouchingLayers(LayerMask.GetMask("Enemigo"))){
+            animator.SetTrigger("Die");
+            playerAlive = false;
+            Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Jugador"),LayerMask.NameToLayer("Enemigo"),true);
+            tryAgainButton.SetActive(true);
+            rb2D.constraints=RigidbodyConstraints2D.FreezeAll;
+        }
+    }
+
+    ///////////////////////////////////////////////
+    ///////////////////////////////////////////////
+
+    public void Move(float direction)
+    {
+        movimientoHorizontal = direction * velocidadDeMovimiento;
+    }
+
+    public void Jump()
+    {
+        salto = true;
+    }
+
+    public void StopMove()
+    {
+        movimientoHorizontal = 0f;
+    }
+
+    // ===== ATAQUE =====
+
+    public void Attack()
+    {
+        if (!puedeAtacar) return;
+
+        animator.SetTrigger("Attack");
+
+        Collider2D[] enemigosGolpeados = Physics2D.OverlapCircleAll(
+            attackPoint.position,
+            attackRadius,
+            enemyLayer
+        );
+
+        foreach (Collider2D enemigo in enemigosGolpeados)
+        {
+            enemigo.SendMessage("Die", SendMessageOptions.DontRequireReceiver);
+        }
+
+        StartCoroutine(AttackCooldown());
+    }
+
+    private IEnumerator AttackCooldown()
+    {
+        puedeAtacar = false;
+        yield return new WaitForSeconds(tiempoEntreAtaques);
+        puedeAtacar = true;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (attackPoint == null) return;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
+    }
+}
